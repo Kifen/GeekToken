@@ -88,4 +88,45 @@ contract("GeekToken", (accounts) => {
       assert(e.message.includes("Insufficient tokens"));
     }
   });
+
+  it("should approve token for delegated transfer", async () => {
+    tokenInstance = await GeekToken.deployed();
+    const success = await tokenInstance.approve.call(accounts[1], 10000, {
+      from: accounts[0],
+    });
+
+    assert.equal(success, true, "it returns true.");
+
+    const tx = await tokenInstance.approve(accounts[1], 10000, {
+      from: accounts[0],
+    });
+
+    const allowance = await tokenInstance.allowance(accounts[0], accounts[1]);
+    const log = tx.receipt.logs[0];
+
+    assert.equal(log.event, "Approval", "triggers an Approval event.");
+    assert.equal(
+      log.args.spender,
+      accounts[1],
+      "logs the account the tokens are authorized to."
+    );
+
+    assert.equal(
+      log.args.tokenOwner,
+      accounts[0],
+      "logs the account the tokens are authorized by."
+    );
+
+    assert.equal(
+      log.args.tokens.toNumber(),
+      10000,
+      "logs the transfer amount."
+    );
+
+    assert.equal(
+      allowance,
+      10000,
+      "stores the allowance for delegated transfer."
+    );
+  });
 });
