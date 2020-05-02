@@ -72,7 +72,10 @@ contract GeekToken is IERC20 {
         returns (bool)
     {
         require(_tokens <= balances[_owner], "Insufficient tokens!");
-        require(_tokens <= allowed[_owner][msg.sender]);
+        require(
+            _tokens <= allowed[_owner][msg.sender],
+            "Exceeded approved amount!"
+        );
 
         balances[_owner] = balances[_owner].sub(_tokens);
         allowed[_owner][msg.sender] = allowed[_owner][msg.sender].sub(_tokens);
